@@ -1,0 +1,16 @@
+---
+# Pre-patch service management tasks
+
+- name: Stop services before patching
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: stopped
+  loop: "{{ patching_services_to_stop }}"
+  register: services_stopped
+  ignore_errors: true
+
+- name: Display stopped services
+  ansible.builtin.debug:
+    msg: "Stopped service: {{ item.item }}"
+  loop: "{{ services_stopped.results }}"
+  when: item.changed

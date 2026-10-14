@@ -1,0 +1,16 @@
+---
+# Initialization tasks for compliance reporting
+
+- name: Set report metadata
+  ansible.builtin.set_fact:
+    report_metadata:
+      report_id: "{{ report_id }}"
+      generated_at: "{{ report_timestamp }}"
+      generated_by: "{{ lookup('env', 'USER') }}"
+      report_type: "compliance"
+
+- name: Create reports directory
+  ansible.builtin.file:
+    path: "{{ report_dir }}"
+    state: directory
+    mode: '0755'

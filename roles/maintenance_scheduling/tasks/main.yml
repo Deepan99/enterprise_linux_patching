@@ -1,0 +1,19 @@
+---
+# Maintenance scheduling role - Main entry point
+# This role handles maintenance window scheduling
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include schedule generation tasks
+  ansible.builtin.include_tasks: generate_schedule.yml
+
+- name: Include notification tasks
+  ansible.builtin.include_tasks: notify_stakeholders.yml
+  when: notify_stakeholders
+
+- name: Include alert generation tasks
+  ansible.builtin.include_tasks: generate_alert.yml
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml

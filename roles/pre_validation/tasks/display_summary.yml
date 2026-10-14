@@ -1,0 +1,26 @@
+---
+# Display summary tasks for pre-validation
+
+- name: Display validation summary
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   PRE-VALIDATION SUMMARY"
+      - "================================================"
+      - "Host: {{ validation_results.host }}"
+      - "Timestamp: {{ validation_results.timestamp }}"
+      - "CPU: {{ validation_results.cpu_usage }}%"
+      - "Memory: {{ validation_results.memory_usage }}%"
+      - "Load: {{ validation_results.system_load }}"
+      - "Disk: {{ validation_results.disk_usage }}"
+      - "Services: {{ 'OK' if validation_results.services_ok else 'FAILED' }}"
+      - "Filesystem: {{ 'OK' if validation_results.filesystem_ok else 'FAILED' }}"
+      - "Maintenance Window: {{ 'OK' if validation_results.maintenance_window_ok else 'FAILED' }}"
+      - "Backup: {{ 'OK' if validation_results.backup_ok else 'FAILED' }}"
+      - "Overall Status: {{ validation_results.overall_status }}"
+      - "================================================"
+
+- name: Fail if validation failed
+  ansible.builtin.fail:
+    msg: "Pre-validation failed for {{ inventory_hostname }}. Check validation results for details."
+  when: validation_results.overall_status == 'FAIL'

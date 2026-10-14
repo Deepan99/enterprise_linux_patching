@@ -1,0 +1,57 @@
+---
+# Example host-specific configuration
+# Copy this file to host_vars/<hostname>.yml and customize
+
+# Server identification
+server_type: application
+criticality: high
+environment: production
+
+# Patching strategy override
+patching_strategy: security
+patching_reboot_required: true
+patching_reboot_timeout: 600
+patching_enable_rollback: true
+
+# Services to manage during patching
+patching_services_to_stop:
+  - httpd
+  - nginx
+  - postgresql
+
+# Pre-validation thresholds (override global)
+pre_validation_cpu_threshold: 75
+pre_validation_memory_threshold: 75
+pre_validation_disk_threshold: 85
+pre_validation_require_backup: true
+pre_validation_backup_age_hours: 24
+pre_validation_critical_services:
+  - httpd
+  - postgresql
+
+# Maintenance window
+maintenance_window:
+  start: "02:00"
+  end: "06:00"
+  timezone: "UTC"
+
+# Post-validation settings
+post_validation_critical_services:
+  - httpd
+  - postgresql
+post_validation_check_applications: true
+post_validation_app_health_url:
+  - "http://localhost/health"
+post_validation_app_health_expected: 200
+
+# Rollback configuration
+rollback_method: package
+rollback_services_to_stop:
+  - httpd
+  - postgresql
+rollback_reboot_after_rollback: true
+
+# Custom package exclusions
+patching_excluded_packages:
+  - kernel-firmware
+  - grub2-common

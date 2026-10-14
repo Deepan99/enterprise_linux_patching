@@ -1,0 +1,10 @@
+---
+# Schedule Maintenance Window
+# Simple orchestrator for maintenance scheduling
+
+- name: Schedule Maintenance Window
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: maintenance_scheduling

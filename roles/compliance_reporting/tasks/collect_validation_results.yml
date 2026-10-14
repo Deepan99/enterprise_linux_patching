@@ -1,0 +1,35 @@
+---
+# Validation results collection tasks
+
+- name: Collect validation results
+  ansible.builtin.find:
+    paths: "{{ validation_results_dir }}"
+    patterns: "*_validation.txt"
+  register: validation_files
+  delegate_to: localhost
+
+- name: Parse validation results
+  ansible.builtin.set_fact:
+    validation_data: []
+  loop: "{{ validation_files.files }}"
+  delegate_to: localhost
+
+- name: Read each validation file
+  ansible.builtin.slurp:
+    src: "{{ item.path }}"
+  register: file_contents
+  loop: "{{ validation_files.files }}"
+  delegate_to: localhost
+
+- name: Parse validation file contents
+  ansible.builtin.set_fact:
+    validation_data: >-
+      {{ validation_data +
+         [{
+           'hostname': item.item.path | basename | regex_replace('_pre_validation.txt|_post_validation.txt', ''),
+           'validation_file': item.item.path | basename,
+           'validation_result': item.content | b64decode
+         }]
+      }}
+  loop: "{{ file_contents.results }}"
+  delegate_to: localhost

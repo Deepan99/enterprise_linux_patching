@@ -1,0 +1,23 @@
+---
+# Approval workflow role default variables
+
+# Request configuration
+requests_dir: "./requests"
+request_id: "{{ ansible_date_time.epoch }}"
+approval_status: pending
+
+# Approval configuration
+approval_required: true
+approval_timeout_hours: 24
+approval_comment_required: false
+
+# Request details
+target_group: "{{ target_group | default('linux_servers') }}"
+patching_strategy: "{{ strategy | default('security') }}"
+patching_schedule: "{{ schedule | default('now') }}"
+justification: "{{ justification | default('Regular maintenance') }}"
+
+# Approver configuration
+approver_email: "{{ approver | default('') }}"
+approver: "{{ lookup('env', 'USER') }}"
+comments: "{{ comments | default('') }}"

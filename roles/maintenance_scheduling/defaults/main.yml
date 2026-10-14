@@ -1,0 +1,17 @@
+---
+# Maintenance scheduling role default variables
+
+# Maintenance configuration
+maintenance_dir: "./maintenance"
+maintenance_id: "{{ ansible_date_time.epoch }}"
+maintenance_type: "{{ type | default('patching') }}"
+
+# Schedule configuration
+target_group: "{{ target_group | default('linux_servers') }}"
+start_time: "{{ start_time | mandatory }}"
+end_time: "{{ end_time | mandatory }}"
+justification: "{{ justification | default('Regular security patching') }}"
+
+# Notification configuration
+notify_stakeholders: "{{ notify | default(true) }}"
+stakeholders: "{{ stakeholders | default(['ops-team@company.com']) }}"

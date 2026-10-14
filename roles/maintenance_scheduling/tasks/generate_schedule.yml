@@ -1,0 +1,33 @@
+---
+# Schedule generation tasks
+
+- name: Generate maintenance schedule
+  ansible.builtin.copy:
+    content: |
+      MAINTENANCE SCHEDULE
+      ====================
+      Maintenance ID: {{ maintenance_metadata.maintenance_id }}
+      Target Group: {{ maintenance_metadata.target_group }}
+      Type: {{ maintenance_metadata.type }}
+      Start Time: {{ maintenance_metadata.start_time }}
+      End Time: {{ maintenance_metadata.end_time }}
+      Justification: {{ maintenance_metadata.justification }}
+      Status: {{ maintenance_metadata.status }}
+      Created By: {{ maintenance_metadata.created_by }}
+      Created At: {{ maintenance_metadata.created_at }}
+
+      STAKEHOLDER NOTIFICATION
+      =======================
+      Notify: {{ notify_stakeholders }}
+      Stakeholders:
+      {% for stakeholder in stakeholders %}
+        - {{ stakeholder }}
+      {% endfor %}
+
+      AFFECTED HOSTS
+      ==============
+      {% for host in groups[target_group] %}
+        - {{ host }}
+      {% endfor %}
+    dest: "{{ maintenance_dir }}/{{ maintenance_metadata.maintenance_id }}_schedule.txt"
+    mode: '0644'

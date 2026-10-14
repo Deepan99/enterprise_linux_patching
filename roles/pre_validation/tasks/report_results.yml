@@ -1,0 +1,43 @@
+---
+# Reporting tasks for pre-validation
+
+- name: Calculate overall validation status
+  ansible.builtin.set_fact:
+    validation_results:
+      timestamp: "{{ validation_results.timestamp }}"
+      host: "{{ validation_results.host }}"
+      cpu_usage: "{{ validation_results.cpu_usage }}"
+      memory_usage: "{{ validation_results.memory_usage }}"
+      disk_usage: "{{ validation_results.disk_usage }}"
+      system_load: "{{ validation_results.system_load }}"
+      services_ok: "{{ validation_results.services_ok }}"
+      filesystem_ok: "{{ validation_results.filesystem_ok }}"
+      maintenance_window_ok: "{{ validation_results.maintenance_window_ok }}"
+      backup_ok: "{{ validation_results.backup_ok }}"
+      overall_status: >-
+        {{ 'PASS' if not (resource_validation_failed | default(false) or
+                          service_validation_failed.failed | default(false) or
+                          filesystem_validation_failed.failed | default(false) or
+                          maintenance_window_validation_failed.failed | default(false) or
+                          backup_validation_failed.failed | default(false))
+               else 'FAIL' }}
+
+- name: Save validation results to file
+  ansible.builtin.copy:
+    content: |
+      Pre-Validation Report
+      =====================
+      Host: {{ validation_results.host }}
+      Timestamp: {{ validation_results.timestamp }}
+      CPU Usage: {{ validation_results.cpu_usage }}%
+      Memory Usage: {{ validation_results.memory_usage }}%
+      System Load: {{ validation_results.system_load }}
+      High Disk Usage: {{ validation_results.disk_usage }}
+      In Maintenance Window: {{ validation_results.maintenance_window_ok }}
+      Last Backup: {{ last_backup.stdout | default('None') }}
+      Services OK: {{ validation_results.services_ok }}
+      Resources OK: {{ not resource_validation_failed | default(true) }}
+      Backup OK: {{ validation_results.backup_ok }}
+      Overall Status: {{ validation_results.overall_status }}
+    dest: "{{ validation_results_dir | default('/tmp/patching_validation') }}/{{ inventory_hostname }}_pre_validation.txt"
+  delegate_to: localhost

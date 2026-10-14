@@ -1,0 +1,26 @@
+---
+# RHEL-based patching tasks
+
+- name: Apply security patches (RHEL-based)
+  ansible.builtin.yum:
+    name: "{{ patching_included_packages if patching_strategy == 'custom' else '*' }}"
+    state: latest
+    exclude: "{{ patching_excluded_packages | join(',') }}"
+    update_cache: yes
+    security: "{{ true if patching_strategy == 'security' else omit }}"
+    bugfix: "{{ true if patching_strategy == 'bugfix' else omit }}"
+  when: os_family == 'rhel'
+  register: yum_patch_result
+
+- name: Update patching results for RHEL
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_results.timestamp }}"
+      host: "{{ patching_results.host }}"
+      os_family: "{{ os_family }}"
+      strategy: "{{ patching_results.strategy }}"
+      packages_updated: "{{ yum_patch_result.changed }}"
+      kernel_updated: "{{ patching_results.kernel_updated }}"
+      reboot_required: "{{ patching_results.reboot_required }}"
+      reboot_performed: "{{ patching_results.reboot_performed }}"
+      duration: "{{ patching_results.duration }}"

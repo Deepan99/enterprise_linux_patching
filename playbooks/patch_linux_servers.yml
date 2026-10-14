@@ -1,0 +1,55 @@
+---
+# Enterprise Linux Patching - Main Playbook
+# Simple orchestrator for the complete patching workflow
+
+- name: Enterprise Linux Patching - Pre-Validation
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  serial:
+    - 1
+    - "20%"
+    - "50%"
+  max_fail_percentage: 10
+  roles:
+    - role: pre_validation
+
+- name: Enterprise Linux Patching - Patching
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  serial:
+    - 1
+    - "20%"
+    - "50%"
+  max_fail_percentage: 10
+  roles:
+    - role: patching
+
+- name: Enterprise Linux Patching - Post-Validation
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  serial:
+    - 1
+    - "20%"
+    - "50%"
+  max_fail_percentage: 10
+  roles:
+    - role: post_validation
+
+- name: Enterprise Linux Patching - Rollback (if triggered)
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  serial: 1
+  roles:
+    - role: rollback
+        when: trigger_rollback | default(false) | bool
+
+- name: Enterprise Linux Patching - Generate Report
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: compliance_reporting

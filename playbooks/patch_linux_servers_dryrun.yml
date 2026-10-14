@@ -1,0 +1,31 @@
+---
+# Enterprise Linux Patching - Dry Run
+# Simple orchestrator for dry-run testing
+
+- name: Enterprise Linux Patching - Dry Run
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  vars:
+    dry_run: true
+  roles:
+    - role: pre_validation
+
+- name: Dry Run - Display Would-Do
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  tasks:
+    - name: Display dry-run simulation
+      ansible.builtin.debug:
+        msg:
+          - "Would apply {{ patching_strategy }} patches to {{ inventory_hostname }}"
+          - "Reboot required: {{ patching_reboot_required }}"
+          - "Rollback enabled: {{ patching_enable_rollback }}"
+
+- name: Dry Run - Post-Validation
+  hosts: "{{ target_group | default('linux_servers') }}"
+  become: yes
+  gather_facts: yes
+  roles:
+    - role: post_validation

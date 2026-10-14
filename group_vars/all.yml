@@ -1,0 +1,37 @@
+---
+# Global variables for all hosts
+
+# Patching configuration
+patching_strategy: security
+patching_reboot_required: true
+patching_reboot_timeout: 600
+patching_enable_rollback: true
+
+# Validation settings
+pre_validation_cpu_threshold: 80
+pre_validation_memory_threshold: 80
+pre_validation_disk_threshold: 90
+pre_validation_check_maintenance_window: true
+pre_validation_require_backup: true
+pre_validation_backup_age_hours: 24
+
+post_validation_cpu_threshold: 90
+post_validation_memory_threshold: 90
+post_validation_disk_threshold: 95
+post_validation_auto_rollback_on_failure: false
+post_validation_rollback_threshold: 3
+
+# Logging
+patching_log_changes: true
+patching_log_dir: /var/log/patching
+validation_results_dir: /tmp/patching_validation
+
+# Notification settings
+enable_notifications: false
+notification_email: []
+notification_slack_webhook: ""
+
+# Compliance settings
+compliance_log_enabled: true
+compliance_log_dir: ./reports
+compliance_retention_days: 365

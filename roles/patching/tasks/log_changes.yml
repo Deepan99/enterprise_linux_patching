@@ -1,0 +1,11 @@
+---
+# Logging tasks for patching
+
+- name: Log patching changes
+  ansible.builtin.shell: |
+    echo "Patching completed at {{ patching_timestamp }}" >> {{ patching_log_dir }}/patch_history.log
+    echo "Packages updated: {{ patching_results.packages_updated }}" >> {{ patching_log_dir }}/patch_history.log
+    echo "Kernel updated: {{ patching_results.kernel_updated }}" >> {{ patching_log_dir }}/patch_history.log
+    echo "Reboot required: {{ system_reboot_required }}" >> {{ patching_log_dir }}/patch_history.log
+    echo "============================================" >> {{ patching_log_dir }}/patch_history.log
+  ignore_errors: true

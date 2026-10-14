@@ -1,0 +1,37 @@
+---
+# Display summary tasks for rollback
+
+- name: Get rollback end time
+  ansible.builtin.set_fact:
+    rollback_end_time: "{{ ansible_date_time.epoch }}"
+    rollback_duration: "{{ (ansible_date_time.epoch | int - rollback_start_time | int) }}"
+
+- name: Update rollback results with duration
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_results.timestamp }}"
+      host: "{{ rollback_results.host }}"
+      method: "{{ rollback_results.method }}"
+      packages_rolled_back: "{{ rollback_results.packages_rolled_back }}"
+      kernel_rolled_back: "{{ rollback_results.kernel_rolled_back }}"
+      backup_restored: "{{ rollback_results.backup_restored }}"
+      reboot_performed: "{{ rollback_results.reboot_performed }}"
+      duration: "{{ rollback_duration }}"
+
+- name: Display rollback summary
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   ROLLBACK SUMMARY"
+      - "================================================"
+      - "Host: {{ rollback_results.host }}"
+      - "Timestamp: {{ rollback_results.timestamp }}"
+      - "Method: {{ rollback_results.method }}"
+      - "Packages Rolled Back: {{ rollback_results.packages_rolled_back }}"
+      - "Kernel Rolled Back: {{ rollback_results.kernel_rolled_back }}"
+      - "Backup Restored: {{ rollback_results.backup_restored }}"
+      - "Reboot Performed: {{ rollback_results.reboot_performed }}"
+      - "Current Kernel: {{ rollback_kernel.stdout }}"
+      - "Duration: {{ rollback_results.duration }} seconds"
+      - "Status: COMPLETED"
+      - "================================================"

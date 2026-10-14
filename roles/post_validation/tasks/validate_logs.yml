@@ -1,0 +1,31 @@
+---
+# Log validation tasks for post-validation
+
+- name: Check for errors in logs
+  ansible.builtin.shell: |
+    grep -iE "{{ post_validation_error_keywords | join('|') }}" {{ item }} | tail -20
+  register: log_errors
+  changed_when: false
+  loop: "{{ post_validation_log_paths }}"
+  ignore_errors: true
+  when: post_validation_log_paths | length > 0
+
+- name: Count log errors found
+  ansible.builtin.set_fact:
+    log_error_count: "{{ log_errors.results | selectattr('stdout', 'defined') | selectattr('stdout', 'ne', '') | list | length }}"
+  when: post_validation_log_paths | length > 0
+
+- name: Set log validation status
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_results.timestamp }}"
+      host: "{{ post_validation_results.host }}"
+      cpu_usage: "{{ post_validation_results.cpu_usage }}"
+      memory_usage: "{{ post_validation_results.memory_usage }}"
+      disk_usage: "{{ post_validation_results.disk_usage }}"
+      system_load: "{{ post_validation_results.system_load }}"
+      services_ok: "{{ post_validation_results.services_ok }}"
+      connectivity_ok: "{{ post_validation_results.connectivity_ok }}"
+      applications_ok: "{{ post_validation_results.applications_ok }}"
+      logs_ok: "{{ log_error_count == 0 if post_validation_log_paths | length > 0 else true }}"
+      overall_status: "{{ post_validation_results.overall_status }}"

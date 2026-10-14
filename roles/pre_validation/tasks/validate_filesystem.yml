@@ -1,0 +1,35 @@
+---
+# Filesystem validation tasks
+
+- name: Check filesystem mounts
+  ansible.builtin.shell: |
+    mount | grep -E "{{ pre_validation_filesystem_mounts | join('|') }}"
+  register: filesystem_check
+  changed_when: false
+  ignore_errors: true
+  when: pre_validation_filesystem_mounts | length > 0
+
+- name: Validate filesystem mounts exist
+  ansible.builtin.assert:
+    that:
+      - filesystem_check.rc == 0
+    fail_msg: "Required filesystem mounts not found: {{ pre_validation_filesystem_mounts }}"
+    quiet: true
+  ignore_errors: true
+  register: filesystem_validation_failed
+  when: pre_validation_filesystem_mounts | length > 0
+
+- name: Set filesystem validation status
+  ansible.builtin.set_fact:
+    validation_results:
+      timestamp: "{{ validation_results.timestamp }}"
+      host: "{{ validation_results.host }}"
+      cpu_usage: "{{ validation_results.cpu_usage }}"
+      memory_usage: "{{ validation_results.memory_usage }}"
+      disk_usage: "{{ validation_results.disk_usage }}"
+      system_load: "{{ validation_results.system_load }}"
+      services_ok: "{{ validation_results.services_ok }}"
+      filesystem_ok: "{{ not filesystem_validation_failed.failed | default(true) }}"
+      maintenance_window_ok: "{{ validation_results.maintenance_window_ok }}"
+      backup_ok: "{{ validation_results.backup_ok }}"
+      overall_status: "{{ validation_results.overall_status }}"

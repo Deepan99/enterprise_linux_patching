@@ -1,0 +1,32 @@
+---
+# RHEL-based rollback tasks
+
+- name: Rollback packages using yum history (RHEL-based)
+  ansible.builtin.shell: |
+    yum history list | tail -n +3 | head -{{ rollback_history_limit }} | awk '{print $1}'
+  register: rhel_history_ids
+  changed_when: false
+  when:
+    - rollback_use_history | default(true)
+
+- name: Undo yum transaction (RHEL-based)
+  ansible.builtin.yum:
+    name: "*"
+    state: present
+    update_cache: yes
+  when:
+    - rhel_history_ids.stdout_lines | length > 0
+  ignore_errors: true
+  register: rhel_rollback_result
+
+- name: Update rollback results for RHEL
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_results.timestamp }}"
+      host: "{{ rollback_results.host }}"
+      method: "{{ rollback_results.method }}"
+      packages_rolled_back: "{{ rhel_rollback_result.changed | default(false) }}"
+      kernel_rolled_back: "{{ rollback_results.kernel_rolled_back }}"
+      backup_restored: "{{ rollback_results.backup_restored }}"
+      reboot_performed: "{{ rollback_results.reboot_performed }}"
+      duration: "{{ rollback_results.duration }}"

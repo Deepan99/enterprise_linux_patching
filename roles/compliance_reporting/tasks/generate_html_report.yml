@@ -1,0 +1,9 @@
+---
+# HTML report generation tasks
+
+- name: Generate HTML compliance report
+  ansible.builtin.template:
+    src: compliance_report.html.j2
+    dest: "{{ report_dir }}/compliance_report_{{ report_id }}.html"
+    mode: '0644'
+  delegate_to: localhost

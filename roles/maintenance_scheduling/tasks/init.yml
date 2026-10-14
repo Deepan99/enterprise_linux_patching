@@ -1,0 +1,21 @@
+---
+# Initialization tasks for maintenance scheduling
+
+- name: Create maintenance schedule directory
+  ansible.builtin.file:
+    path: "{{ maintenance_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set maintenance metadata
+  ansible.builtin.set_fact:
+    maintenance_metadata:
+      maintenance_id: "{{ maintenance_id }}"
+      target_group: "{{ target_group }}"
+      type: "{{ maintenance_type }}"
+      start_time: "{{ start_time }}"
+      end_time: "{{ end_time }}"
+      justification: "{{ justification }}"
+      status: "SCHEDULED"
+      created_by: "{{ lookup('env', 'USER') }}"
+      created_at: "{{ ansible_date_time.iso8601 }}"

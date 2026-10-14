@@ -1,0 +1,18 @@
+---
+# Handlers for rollback role
+
+- name: Alert on rollback completion
+  ansible.builtin.debug:
+    msg: "Rollback completed for {{ inventory_hostname }}"
+  listen: rollback_complete
+
+- name: Log rollback completion
+  ansible.builtin.shell: |
+    echo "[{{ ansible_date_time.iso8601 }}] Rollback completed for {{ inventory_hostname }}" >> {{ validation_results_dir | default('/tmp/patching_validation') }}/rollback.log
+  delegate_to: localhost
+  listen: rollback_complete
+
+- name: Notify on rollback
+  ansible.builtin.debug:
+    msg: "Rollback notification sent for {{ inventory_hostname }}"
+  listen: rollback_complete

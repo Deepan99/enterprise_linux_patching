@@ -1,0 +1,15 @@
+---
+# Verification tasks for patching
+
+- name: Verify installed packages
+  ansible.builtin.package_facts:
+    manager: auto
+
+- name: Get current kernel version
+  ansible.builtin.shell: uname -r
+  register: current_kernel
+  changed_when: false
+
+- name: Display current kernel version
+  ansible.builtin.debug:
+    msg: "Current kernel version: {{ current_kernel.stdout }}"

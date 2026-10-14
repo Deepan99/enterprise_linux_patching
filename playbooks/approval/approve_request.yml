@@ -1,0 +1,12 @@
+---
+# Approve Patching Request
+# Simple orchestrator for approving requests
+
+- name: Approve Patching Request
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars:
+    approval_action: approve
+  roles:
+    - role: approval_workflow

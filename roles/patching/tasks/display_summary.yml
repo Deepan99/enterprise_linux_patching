@@ -1,0 +1,38 @@
+---
+# Display summary tasks for patching
+
+- name: Get patching end time
+  ansible.builtin.set_fact:
+    patching_end_time: "{{ ansible_date_time.epoch }}"
+    patching_duration: "{{ (ansible_date_time.epoch | int - patching_start_time | int) }}"
+
+- name: Update patching results with duration
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_results.timestamp }}"
+      host: "{{ patching_results.host }}"
+      os_family: "{{ patching_results.os_family }}"
+      strategy: "{{ patching_results.strategy }}"
+      packages_updated: "{{ patching_results.packages_updated }}"
+      kernel_updated: "{{ patching_results.kernel_updated }}"
+      reboot_required: "{{ patching_results.reboot_required }}"
+      reboot_performed: "{{ patching_results.reboot_performed }}"
+      duration: "{{ patching_duration }}"
+
+- name: Display patching summary
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   PATCHING SUMMARY"
+      - "================================================"
+      - "Host: {{ patching_results.host }}"
+      - "Timestamp: {{ patching_results.timestamp }}"
+      - "OS Family: {{ patching_results.os_family }}"
+      - "Strategy: {{ patching_results.strategy }}"
+      - "Packages Updated: {{ patching_results.packages_updated }}"
+      - "Kernel Updated: {{ patching_results.kernel_updated }}"
+      - "Current Kernel: {{ current_kernel.stdout }}"
+      - "Reboot Required: {{ patching_results.reboot_required }}"
+      - "Reboot Performed: {{ patching_results.reboot_performed }}"
+      - "Duration: {{ patching_results.duration }} seconds"
+      - "================================================"

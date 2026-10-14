@@ -1,0 +1,32 @@
+---
+# Application health validation tasks for post-validation
+
+- name: Verify application health endpoints
+  ansible.builtin.uri:
+    url: "{{ item }}"
+    method: GET
+    status_code: "{{ post_validation_app_health_expected }}"
+  loop: "{{ post_validation_app_health_url }}"
+  register: app_health_result
+  ignore_errors: true
+  when: post_validation_app_health_url | length > 0
+
+- name: Count application health failures
+  ansible.builtin.set_fact:
+    application_failures: "{{ app_health_result.results | selectattr('failed', 'equalto', true) | list | length }}"
+  when: post_validation_app_health_url | length > 0
+
+- name: Set application validation status
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_results.timestamp }}"
+      host: "{{ post_validation_results.host }}"
+      cpu_usage: "{{ post_validation_results.cpu_usage }}"
+      memory_usage: "{{ post_validation_results.memory_usage }}"
+      disk_usage: "{{ post_validation_results.disk_usage }}"
+      system_load: "{{ post_validation_results.system_load }}"
+      services_ok: "{{ post_validation_results.services_ok }}"
+      connectivity_ok: "{{ post_validation_results.connectivity_ok }}"
+      applications_ok: "{{ application_failures == 0 if post_validation_app_health_url | length > 0 else true }}"
+      logs_ok: "{{ post_validation_results.logs_ok }}"
+      overall_status: "{{ post_validation_results.overall_status }}"

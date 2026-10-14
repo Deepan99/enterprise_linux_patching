@@ -1,0 +1,26 @@
+---
+# Request creation tasks
+
+- name: Generate patching request
+  ansible.builtin.template:
+    src: approval_request.json.j2
+    dest: "{{ requests_dir }}/{{ request_metadata.request_id }}_approval.json"
+    mode: '0644'
+
+- name: Display approval request details
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   PATCHING APPROVAL REQUEST"
+      - "================================================"
+      - "Request ID: {{ request_metadata.request_id }}"
+      - "Target Group: {{ request_metadata.target_group }}"
+      - "Strategy: {{ request_metadata.strategy }}"
+      - "Schedule: {{ request_metadata.schedule }}"
+      - "Justification: {{ request_metadata.justification }}"
+      - "Requested By: {{ request_metadata.requested_by }}"
+      - "Request File: {{ requests_dir }}/{{ request_metadata.request_id }}_approval.json"
+      - "================================================"
+      - "To approve this request, run:"
+      - "  ansible-playbook playbooks/approval/approve_request.yml -e request_id={{ request_metadata.request_id }}"
+      - "================================================"

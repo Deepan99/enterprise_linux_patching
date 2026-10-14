@@ -1,0 +1,13 @@
+---
+# OS detection tasks for rollback
+
+- name: Detect OS family
+  ansible.builtin.set_fact:
+    os_family: >-
+      {{ 'rhel' if ansible_os_family == 'RedHat'
+         else 'debian' if ansible_os_family == 'Debian'
+         else 'unknown' }}
+
+- name: Display detected OS family
+  ansible.builtin.debug:
+    msg: "Detected OS family: {{ os_family }} for rollback on {{ inventory_hostname }}"

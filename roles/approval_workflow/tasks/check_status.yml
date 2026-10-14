@@ -1,0 +1,37 @@
+---
+# Request status check tasks
+
+- name: Check if request file exists
+  ansible.builtin.stat:
+    path: "{{ requests_dir }}/{{ request_id }}_approval.json"
+  register: request_check
+
+- name: Fail if request not found
+  ansible.builtin.fail:
+    msg: "Request {{ request_id }} not found. File: {{ requests_dir }}/{{ request_id }}_approval.json"
+  when: not request_check.stat.exists
+
+- name: Read current request
+  ansible.builtin.slurp:
+    src: "{{ requests_dir }}/{{ request_id }}_approval.json"
+  register: request_content
+
+- name: Parse request data
+  ansible.builtin.set_fact:
+    request_data: "{{ request_content.content | b64decode | from_json }}"
+
+- name: Display request status
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   REQUEST STATUS"
+      - "================================================"
+      - "Request ID: {{ request_data.request_id }}"
+      - "Status: {{ request_data.status }}"
+      - "Target Group: {{ request_data.target_group }}"
+      - "Strategy: {{ request_data.strategy }}"
+      - "Requested By: {{ request_data.requested_by }}"
+      - "Requested At: {{ request_data.requested_at }}"
+      - "Approver: {{ request_data.approver | default('N/A') }}"
+      - "Approved At: {{ request_data.approved_at | default('N/A') }}"
+      - "================================================"

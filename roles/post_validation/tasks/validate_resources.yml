@@ -1,0 +1,79 @@
+---
+# Resource validation tasks for post-validation
+
+- name: Check system load
+  ansible.builtin.shell: |
+    uptime | awk -F'load average:' '{print $2}' | awk '{print $1}' | sed 's/,//'
+  register: post_system_load
+  changed_when: false
+  ignore_errors: true
+
+- name: Check CPU usage
+  ansible.builtin.shell: |
+    top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" | awk '{print 100 - $1}'
+  register: post_cpu_usage
+  changed_when: false
+  ignore_errors: true
+
+- name: Check memory usage
+  ansible.builtin.shell: |
+    free | grep Mem | awk '{printf("%.0f", $3/$2 * 100.0)}'
+  register: post_memory_usage
+  changed_when: false
+  ignore_errors: true
+
+- name: Check disk usage
+  ansible.builtin.shell: |
+    df -h | awk '$5+0 > {{ post_validation_disk_threshold }} {print $6, $5}'
+  register: post_disk_usage
+  changed_when: false
+  ignore_errors: true
+
+- name: Update post-validation results with resource data
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_results.timestamp }}"
+      host: "{{ post_validation_results.host }}"
+      cpu_usage: "{{ post_cpu_usage.stdout | default('N/A') }}"
+      memory_usage: "{{ post_memory_usage.stdout | default('N/A') }}"
+      disk_usage: "{{ post_disk_usage.stdout | default('None') }}"
+      system_load: "{{ post_system_load.stdout | default('N/A') }}"
+      services_ok: "{{ post_validation_results.services_ok }}"
+      connectivity_ok: "{{ post_validation_results.connectivity_ok }}"
+      applications_ok: "{{ post_validation_results.applications_ok }}"
+      logs_ok: "{{ post_validation_results.logs_ok }}"
+      overall_status: "{{ post_validation_results.overall_status }}"
+
+- name: Validate CPU usage threshold
+  ansible.builtin.assert:
+    that:
+      - post_cpu_usage.stdout | int <= post_validation_cpu_threshold
+    fail_msg: "CPU usage {{ post_cpu_usage.stdout }}% exceeds threshold {{ post_validation_cpu_threshold }}%"
+    quiet: true
+  ignore_errors: true
+  register: post_cpu_validation_failed
+
+- name: Validate memory usage threshold
+  ansible.builtin.assert:
+    that:
+      - post_memory_usage.stdout | int <= post_validation_memory_threshold
+    fail_msg: "Memory usage {{ post_memory_usage.stdout }}% exceeds threshold {{ post_validation_memory_threshold }}%"
+    quiet: true
+  ignore_errors: true
+  register: post_memory_validation_failed
+
+- name: Validate disk usage threshold
+  ansible.builtin.assert:
+    that:
+      - post_disk_usage.stdout == ""
+    fail_msg: "Disk usage exceeds threshold on: {{ post_disk_usage.stdout }}"
+    quiet: true
+  ignore_errors: true
+  register: post_disk_validation_failed
+
+- name: Set resource validation status
+  ansible.builtin.set_fact:
+    post_resource_validation_failed: >-
+      {{ post_cpu_validation_failed.failed | default(false) or
+         post_memory_validation_failed.failed | default(false) or
+         post_disk_validation_failed.failed | default(false) }}

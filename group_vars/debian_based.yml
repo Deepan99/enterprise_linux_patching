@@ -1,0 +1,22 @@
+---
+# Debian-based distribution specific variables
+
+patching_apt_options: "-y"
+patching_update_kernel: true
+patching_excluded_packages:
+  - linux-firmware
+  - grub-pc-bin
+
+# Debian-specific validation
+pre_validation_check_filesystem: true
+pre_validation_filesystem_mounts:
+  - /boot
+  - /var
+  - /home
+
+# Debian-specific post-validation
+post_validation_check_logs: true
+post_validation_log_paths:
+  - /var/log/syslog
+  - /var/log/dmesg
+  - /var/log/auth.log

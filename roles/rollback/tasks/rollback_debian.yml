@@ -1,0 +1,33 @@
+---
+# Debian/Ubuntu rollback tasks
+
+- name: Rollback packages using history (Debian/Ubuntu)
+  ansible.builtin.shell: |
+    grep "install" /var/log/dpkg.log | tail -{{ rollback_history_limit }} | awk '{print $4}' | sort -u
+  register: debian_package_history
+  changed_when: false
+  when:
+    - rollback_use_history | default(true)
+
+- name: Rollback to previous package versions (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ debian_package_history.stdout_lines }}"
+  when:
+    - debian_package_history.stdout_lines | length > 0
+  ignore_errors: true
+  register: debian_rollback_result
+
+- name: Update rollback results for Debian
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_results.timestamp }}"
+      host: "{{ rollback_results.host }}"
+      method: "{{ rollback_results.method }}"
+      packages_rolled_back: "{{ debian_rollback_result.changed | default(false) }}"
+      kernel_rolled_back: "{{ rollback_results.kernel_rolled_back }}"
+      backup_restored: "{{ rollback_results.backup_restored }}"
+      reboot_performed: "{{ rollback_results.reboot_performed }}"
+      duration: "{{ rollback_results.duration }}"

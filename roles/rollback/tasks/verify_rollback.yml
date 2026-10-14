@@ -1,0 +1,11 @@
+---
+# Verification tasks for rollback
+
+- name: Verify system after rollback
+  ansible.builtin.shell: uname -r
+  register: rollback_kernel
+  changed_when: false
+
+- name: Display current kernel after rollback
+  ansible.builtin.debug:
+    msg: "Current kernel after rollback: {{ rollback_kernel.stdout }}"

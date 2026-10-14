@@ -1,0 +1,45 @@
+---
+# Debian/Ubuntu patching tasks
+
+- name: Hold excluded packages (Debian/Ubuntu)
+  ansible.builtin.command: "apt-mark hold {{ item }}"
+  loop: "{{ patching_excluded_packages }}"
+  when:
+    - os_family == 'debian'
+    - patching_excluded_packages | length > 0
+  changed_when: false
+  ignore_errors: true
+  register: apt_hold_result
+
+- name: Apply security patches (Debian/Ubuntu)
+  ansible.builtin.apt:
+    upgrade: dist
+    autoclean: yes
+    autoremove: yes
+    only_upgrade: "{{ patching_strategy == 'security' }}"
+    name: "{{ patching_included_packages if patching_strategy == 'custom' else omit }}"
+  when: os_family == 'debian'
+  register: apt_patch_result
+
+- name: Unhold excluded packages (Debian/Ubuntu)
+  ansible.builtin.command: "apt-mark unhold {{ item }}"
+  loop: "{{ patching_excluded_packages }}"
+  when:
+    - os_family == 'debian'
+    - patching_excluded_packages | length > 0
+    - apt_hold_result is defined
+  changed_when: false
+  ignore_errors: true
+
+- name: Update patching results for Debian
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_results.timestamp }}"
+      host: "{{ patching_results.host }}"
+      os_family: "{{ os_family }}"
+      strategy: "{{ patching_results.strategy }}"
+      packages_updated: "{{ apt_patch_result.changed }}"
+      kernel_updated: "{{ patching_results.kernel_updated }}"
+      reboot_required: "{{ patching_results.reboot_required }}"
+      reboot_performed: "{{ patching_results.reboot_performed }}"
+      duration: "{{ patching_results.duration }}"

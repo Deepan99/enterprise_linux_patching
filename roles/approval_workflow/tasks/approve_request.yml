@@ -1,0 +1,68 @@
+---
+# Request approval tasks
+
+- name: Check if request file exists
+  ansible.builtin.stat:
+    path: "{{ requests_dir }}/{{ request_id }}_approval.json"
+  register: request_check
+
+- name: Fail if request not found
+  ansible.builtin.fail:
+    msg: "Request {{ request_id }} not found. File: {{ requests_dir }}/{{ request_id }}_approval.json"
+  when: not request_check.stat.exists
+
+- name: Read current request
+  ansible.builtin.slurp:
+    src: "{{ requests_dir }}/{{ request_id }}_approval.json"
+  register: request_content
+
+- name: Parse request data
+  ansible.builtin.set_fact:
+    request_data: "{{ request_content.content | b64decode | from_json }}"
+
+- name: Display request details
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   PATCHING REQUEST DETAILS"
+      - "================================================"
+      - "Request ID: {{ request_data.request_id }}"
+      - "Target Group: {{ request_data.target_group }}"
+      - "Strategy: {{ request_data.strategy }}"
+      - "Schedule: {{ request_data.schedule }}"
+      - "Justification: {{ request_data.justification }}"
+      - "Requested By: {{ request_data.requested_by }}"
+      - "Requested At: {{ request_data.requested_at }}"
+      - "Current Status: {{ request_data.status }}"
+      - "================================================"
+
+- name: Update request status to approved
+  ansible.builtin.copy:
+    content: |
+      {
+        "request_id": "{{ request_data.request_id }}",
+        "status": "approved",
+        "target_group": "{{ request_data.target_group }}",
+        "strategy": "{{ request_data.strategy }}",
+        "schedule": "{{ request_data.schedule }}",
+        "justification": "{{ request_data.justification }}",
+        "requested_by": "{{ request_data.requested_by }}",
+        "requested_at": "{{ request_data.requested_at }}",
+        "approver": "{{ approver }}",
+        "approved_at": "{{ ansible_date_time.iso8601 }}",
+        "comments": "{{ comments }}"
+      }
+    dest: "{{ requests_dir }}/{{ request_id }}_approval.json"
+    mode: '0644'
+
+- name: Display approval confirmation
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   REQUEST APPROVED"
+      - "================================================"
+      - "Request ID: {{ request_id }}"
+      - "Approved By: {{ approver }}"
+      - "Approved At: {{ ansible_date_time.iso8601 }}"
+      - "Comments: {{ comments }}"
+      - "================================================"

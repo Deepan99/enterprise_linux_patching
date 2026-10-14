@@ -1,0 +1,20 @@
+---
+# Package cache update tasks
+
+- name: Update package cache (Debian/Ubuntu)
+  ansible.builtin.apt:
+    update_cache: yes
+    cache_valid_time: 3600
+  when: os_family == 'debian'
+  register: apt_cache_update
+
+- name: Clean package cache (RHEL-based)
+  ansible.builtin.yum:
+    autoremove: yes
+  when: os_family == 'rhel'
+  ignore_errors: true
+  register: yum_cache_clean
+
+- name: Display cache update status
+  ansible.builtin.debug:
+    msg: "Package cache updated for {{ os_family }} system"

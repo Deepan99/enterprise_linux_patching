@@ -1,0 +1,28 @@
+---
+# Maintenance scheduling role metadata
+galaxy_info:
+  author: Enterprise Operations
+  description: Maintenance scheduling role for enterprise patching operations
+  company: Your Company
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+
+  galaxy_tags:
+    - maintenance
+    - scheduling
+    - patching
+    - operations
+    - window
+
+dependencies: []

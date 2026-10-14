@@ -1,0 +1,31 @@
+---
+# Service validation tasks for post-validation
+
+- name: Gather service facts
+  ansible.builtin.service_facts:
+
+- name: Validate critical services are running
+  ansible.builtin.assert:
+    that:
+      - ansible_facts.services[item].state == post_validation_service_state
+    fail_msg: "Critical service {{ item }} is not running after patching (state: {{ ansible_facts.services[item].state }})"
+    quiet: true
+  loop: "{{ post_validation_critical_services }}"
+  ignore_errors: true
+  register: post_service_validation_failed
+  when: post_validation_critical_services | length > 0
+
+- name: Set service validation status
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_results.timestamp }}"
+      host: "{{ post_validation_results.host }}"
+      cpu_usage: "{{ post_validation_results.cpu_usage }}"
+      memory_usage: "{{ post_validation_results.memory_usage }}"
+      disk_usage: "{{ post_validation_results.disk_usage }}"
+      system_load: "{{ post_validation_results.system_load }}"
+      services_ok: "{{ not post_service_validation_failed.failed | default(true) }}"
+      connectivity_ok: "{{ post_validation_results.connectivity_ok }}"
+      applications_ok: "{{ post_validation_results.applications_ok }}"
+      logs_ok: "{{ post_validation_results.logs_ok }}"
+      overall_status: "{{ post_validation_results.overall_status }}"

@@ -1,0 +1,36 @@
+---
+# Pre-validation role default variables
+
+# Validation thresholds
+pre_validation_cpu_threshold: 80
+pre_validation_memory_threshold: 80
+pre_validation_disk_threshold: 90
+
+# Service check settings
+pre_validation_check_services: true
+pre_validation_critical_services: []
+pre_validation_service_state: running
+
+# Connectivity checks
+pre_validation_check_connectivity: true
+pre_validation_check_ports: [22, 80, 443]
+
+# Backup requirements
+pre_validation_require_backup: true
+pre_validation_backup_age_hours: 24
+
+# Maintenance window checks
+pre_validation_check_maintenance_window: true
+pre_validation_maintenance_window_start: "02:00"
+pre_validation_maintenance_window_end: "06:00"
+
+# Filesystem checks
+pre_validation_check_filesystem: true
+pre_validation_filesystem_mounts: []
+
+# Database checks (if applicable)
+pre_validation_check_databases: false
+pre_validation_database_backups: true
+
+# Rollback plan verification
+pre_validation_require_rollback_plan: true

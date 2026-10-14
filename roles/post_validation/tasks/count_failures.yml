@@ -1,0 +1,15 @@
+---
+# Failure counting tasks for post-validation
+
+- name: Count validation failures
+  ansible.builtin.set_fact:
+    validation_failure_count: >-
+      {{ (1 if post_resource_validation_failed | default(false) else 0) +
+         (1 if post_service_validation_failed.failed | default(false) else 0) +
+         (connectivity_failures | default(0)) +
+         (application_failures | default(0)) +
+         (1 if log_error_count | default(0) > 0 else 0) }}
+
+- name: Display failure count
+  ansible.builtin.debug:
+    msg: "Total validation failures: {{ validation_failure_count }}"

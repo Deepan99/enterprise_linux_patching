@@ -1,0 +1,34 @@
+---
+# Patching role default variables
+
+# Patching strategy
+patching_strategy: security  # Options: security, full, kernel, custom
+patching_reboot_required: true
+patching_reboot_timeout: 600
+
+# Package management
+patching_update_kernel: true
+patching_excluded_packages: []
+patching_included_packages: []
+
+# Pre-patch actions
+patching_create_snapshot: false
+patching_stop_services: false
+patching_services_to_stop: []
+
+# Post-patch actions
+patching_start_services: false
+patching_verify_packages: true
+
+# Rollback settings
+patching_enable_rollback: true
+patching_rollback_snapshot: false
+
+# Distribution-specific settings
+patching_dnf_options: "-y"
+patching_apt_options: "-y"
+patching_yum_options: "-y"
+
+# Logging
+patching_log_changes: true
+patching_log_dir: /var/log/patching

@@ -1,0 +1,24 @@
+---
+# Compliance reporting role - Main entry point
+# This role generates compliance reports and audit logs
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include validation results collection tasks
+  ansible.builtin.include_tasks: collect_validation_results.yml
+
+- name: Include JSON report generation tasks
+  ansible.builtin.include_tasks: generate_json_report.yml
+  when: generate_json_report
+
+- name: Include HTML report generation tasks
+  ansible.builtin.include_tasks: generate_html_report.yml
+  when: generate_html_report
+
+- name: Include audit log generation tasks
+  ansible.builtin.include_tasks: generate_audit_log.yml
+  when: generate_audit_log
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml

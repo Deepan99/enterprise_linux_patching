@@ -1,0 +1,30 @@
+---
+# Initialization tasks for pre-validation
+
+- name: Set validation timestamp
+  ansible.builtin.set_fact:
+    pre_validation_timestamp: "{{ ansible_date_time.iso8601 }}"
+    pre_validation_start_time: "{{ ansible_date_time.epoch }}"
+
+- name: Create validation results directory
+  ansible.builtin.file:
+    path: "{{ validation_results_dir | default('/tmp/patching_validation') }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+- name: Initialize validation results dictionary
+  ansible.builtin.set_fact:
+    validation_results:
+      timestamp: "{{ pre_validation_timestamp }}"
+      host: "{{ inventory_hostname }}"
+      cpu_usage: null
+      memory_usage: null
+      disk_usage: null
+      system_load: null
+      services_ok: true
+      filesystem_ok: true
+      maintenance_window_ok: true
+      backup_ok: true
+      overall_status: "PENDING"

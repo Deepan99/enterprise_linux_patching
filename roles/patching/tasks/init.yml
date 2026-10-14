@@ -1,0 +1,27 @@
+---
+# Initialization tasks for patching
+
+- name: Set patching timestamp
+  ansible.builtin.set_fact:
+    patching_timestamp: "{{ ansible_date_time.iso8601 }}"
+    patching_start_time: "{{ ansible_date_time.epoch }}"
+
+- name: Create patching log directory
+  ansible.builtin.file:
+    path: "{{ patching_log_dir }}"
+    state: directory
+    mode: '0755'
+  when: patching_log_changes
+
+- name: Initialize patching results dictionary
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_timestamp }}"
+      host: "{{ inventory_hostname }}"
+      os_family: null
+      strategy: "{{ patching_strategy }}"
+      packages_updated: false
+      kernel_updated: false
+      reboot_required: false
+      reboot_performed: false
+      duration: 0

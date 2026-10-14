@@ -1,0 +1,52 @@
+---
+# Rollback role - Main entry point
+# This role handles rollback of patching changes
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include OS detection tasks
+  ansible.builtin.include_tasks: detect_os.yml
+
+- name: Include pre-rollback service management tasks
+  ansible.builtin.include_tasks: manage_services_pre.yml
+  when: rollback_stop_services
+
+- name: Include Debian/Ubuntu rollback tasks
+  ansible.builtin.include_tasks: rollback_debian.yml
+  when:
+    - os_family == 'debian'
+    - rollback_method == 'package'
+
+- name: Include RHEL-based rollback tasks
+  ansible.builtin.include_tasks: rollback_rhel.yml
+  when:
+    - os_family == 'rhel'
+    - rollback_method == 'package'
+
+- name: Include kernel rollback tasks
+  ansible.builtin.include_tasks: rollback_kernel.yml
+  when: rollback_method == 'package'
+
+- name: Include backup restoration tasks
+  ansible.builtin.include_tasks: restore_backup.yml
+  when: rollback_method == 'backup'
+
+- name: Include reboot tasks
+  ansible.builtin.include_tasks: reboot_system.yml
+  when:
+    - rollback_reboot_after_rollback
+    - (debian_rollback_result.changed | default(false) or rhel_rollback_result.changed | default(false))
+
+- name: Include post-rollback service management tasks
+  ansible.builtin.include_tasks: manage_services_post.yml
+  when:
+    - rollback_start_services
+    - rollback_stop_services
+
+- name: Include verification tasks
+  ansible.builtin.include_tasks: verify_rollback.yml
+  when: rollback_verify
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml

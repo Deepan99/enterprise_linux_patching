@@ -1,0 +1,53 @@
+---
+# Patching role - Main entry point
+# This role handles the actual patching of Linux systems
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include OS detection tasks
+  ansible.builtin.include_tasks: detect_os.yml
+
+- name: Include pre-patch service management tasks
+  ansible.builtin.include_tasks: manage_services_pre.yml
+  when: patching_stop_services
+
+- name: Include package cache update tasks
+  ansible.builtin.include_tasks: update_cache.yml
+
+- name: Include Debian/Ubuntu patching tasks
+  ansible.builtin.include_tasks: patch_debian.yml
+  when: os_family == 'debian'
+
+- name: Include RHEL-based patching tasks
+  ansible.builtin.include_tasks: patch_rhel.yml
+  when: os_family == 'rhel'
+
+- name: Include kernel update tasks
+  ansible.builtin.include_tasks: update_kernel.yml
+
+- name: Include reboot check tasks
+  ansible.builtin.include_tasks: check_reboot.yml
+
+- name: Include logging tasks
+  ansible.builtin.include_tasks: log_changes.yml
+  when: patching_log_changes
+
+- name: Include reboot tasks
+  ansible.builtin.include_tasks: reboot_system.yml
+  when:
+    - patching_reboot_required
+    - system_reboot_required | default(false)
+
+- name: Include post-patch service management tasks
+  ansible.builtin.include_tasks: manage_services_post.yml
+  when:
+    - patching_start_services
+    - patching_stop_services
+
+- name: Include verification tasks
+  ansible.builtin.include_tasks: verify_patching.yml
+  when: patching_verify_packages
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml

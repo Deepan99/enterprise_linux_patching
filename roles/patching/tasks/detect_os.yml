@@ -1,0 +1,18 @@
+---
+# OS detection tasks
+
+- name: Detect OS family
+  ansible.builtin.set_fact:
+    os_family: >-
+      {{ 'rhel' if ansible_os_family == 'RedHat'
+         else 'debian' if ansible_os_family == 'Debian'
+         else 'unknown' }}
+
+- name: Display detected OS family
+  ansible.builtin.debug:
+    msg: "Detected OS family: {{ os_family }} for {{ inventory_hostname }}"
+
+- name: Fail if OS family is not supported
+  ansible.builtin.fail:
+    msg: "OS family {{ ansible_os_family }} is not supported by this role"
+  when: os_family == 'unknown'

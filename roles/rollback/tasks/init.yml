@@ -1,0 +1,23 @@
+---
+# Initialization tasks for rollback
+
+- name: Set rollback timestamp
+  ansible.builtin.set_fact:
+    rollback_timestamp: "{{ ansible_date_time.iso8601 }}"
+    rollback_start_time: "{{ ansible_date_time.epoch }}"
+
+- name: Log rollback initiation
+  ansible.builtin.debug:
+    msg: "Initiating rollback for {{ inventory_hostname }} using method: {{ rollback_method }}"
+
+- name: Initialize rollback results dictionary
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_timestamp }}"
+      host: "{{ inventory_hostname }}"
+      method: "{{ rollback_method }}"
+      packages_rolled_back: false
+      kernel_rolled_back: false
+      backup_restored: false
+      reboot_performed: false
+      duration: 0

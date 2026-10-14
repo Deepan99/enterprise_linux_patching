@@ -1,0 +1,43 @@
+---
+# Kernel update tasks
+
+- name: Update kernel specifically (RHEL-based)
+  ansible.builtin.yum:
+    name:
+      - kernel
+      - kernel-core
+      - kernel-modules
+      - kernel-devel
+    state: latest
+    update_cache: yes
+  when:
+    - os_family == 'rhel'
+    - patching_update_kernel
+  register: kernel_update_result_rhel
+
+- name: Update kernel specifically (Debian/Ubuntu)
+  ansible.builtin.apt:
+    name:
+      - linux-image-generic
+      - linux-headers-generic
+    state: latest
+    update_cache: yes
+  when:
+    - os_family == 'debian'
+    - patching_update_kernel
+  register: kernel_update_result_debian
+
+- name: Update patching results with kernel status
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_results.timestamp }}"
+      host: "{{ patching_results.host }}"
+      os_family: "{{ patching_results.os_family }}"
+      strategy: "{{ patching_results.strategy }}"
+      packages_updated: "{{ patching_results.packages_updated }}"
+      kernel_updated: >-
+        {{ kernel_update_result_rhel.changed | default(false) or
+           kernel_update_result_debian.changed | default(false) }}
+      reboot_required: "{{ patching_results.reboot_required }}"
+      reboot_performed: "{{ patching_results.reboot_performed }}"
+      duration: "{{ patching_results.duration }}"

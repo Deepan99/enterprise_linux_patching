@@ -1,0 +1,27 @@
+---
+# Handlers for patching role
+
+- name: Restart sshd
+  ansible.builtin.service:
+    name: sshd
+    state: restarted
+  listen: restart_sshd
+  when: ansible_os_family == 'RedHat'
+
+- name: Restart ssh
+  ansible.builtin.service:
+    name: ssh
+    state: restarted
+  listen: restart_sshd
+  when: ansible_os_family == 'Debian'
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  listen: reload_systemd
+
+- name: Log patching completion
+  ansible.builtin.shell: |
+    echo "[{{ ansible_date_time.iso8601 }}] Patching completed for {{ inventory_hostname }}" >> {{ patching_log_dir }}/patching_complete.log
+  delegate_to: localhost
+  listen: patching_complete

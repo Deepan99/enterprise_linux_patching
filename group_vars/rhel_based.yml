@@ -1,0 +1,22 @@
+---
+# RHEL-based distribution specific variables
+
+patching_dnf_options: "-y"
+patching_yum_options: "-y"
+patching_update_kernel: true
+patching_excluded_packages:
+  - kernel-firmware
+  - grub2-common
+
+# RHEL-specific validation
+pre_validation_check_filesystem: true
+pre_validation_filesystem_mounts:
+  - /boot
+  - /var
+  - /home
+
+# RHEL-specific post-validation
+post_validation_check_logs: true
+post_validation_log_paths:
+  - /var/log/messages
+  - /var/log/dmesg

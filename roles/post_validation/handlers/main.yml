@@ -1,0 +1,18 @@
+---
+# Handlers for post-validation role
+
+- name: Alert on post-validation failure
+  ansible.builtin.debug:
+    msg: "Post-validation failed for {{ inventory_hostname }}. Manual intervention may be required."
+  listen: post_validation_failed
+
+- name: Log post-validation failure
+  ansible.builtin.shell: |
+    echo "[{{ ansible_date_time.iso8601 }}] Post-validation failed for {{ inventory_hostname }}" >> {{ validation_results_dir | default('/tmp/patching_validation') }}/post_validation_failures.log
+  delegate_to: localhost
+  listen: post_validation_failed
+
+- name: Trigger rollback
+  ansible.builtin.debug:
+    msg: "Rollback triggered for {{ inventory_hostname }} due to validation failures"
+  listen: trigger_rollback

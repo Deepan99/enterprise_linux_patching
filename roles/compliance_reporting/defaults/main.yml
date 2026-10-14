@@ -1,0 +1,26 @@
+---
+# Compliance reporting role default variables
+
+# Report configuration
+report_dir: "./reports"
+report_date: "{{ ansible_date_time.date }}"
+report_timestamp: "{{ ansible_date_time.iso8601 }}"
+report_id: "{{ ansible_date_time.epoch }}"
+
+# Report formats
+generate_json_report: true
+generate_html_report: true
+generate_audit_log: true
+
+# Compliance standards
+compliance_standards:
+  - ISO27001
+  - NIST
+  - SOC2
+
+# Validation results directory
+validation_results_dir: "/tmp/patching_validation"
+
+# Audit configuration
+audit_log_enabled: true
+audit_log_retention_days: 365

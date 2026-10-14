@@ -1,0 +1,35 @@
+---
+# Reboot check tasks
+
+- name: Check if reboot is required (Debian/Ubuntu)
+  ansible.builtin.stat:
+    path: /var/run/reboot-required
+  register: reboot_required_debian
+  when: os_family == 'debian'
+
+- name: Check if reboot is required (RHEL-based)
+  ansible.builtin.shell: |
+    needs-restarting -r > /dev/null 2>&1; echo $?
+  register: reboot_required_rhel
+  changed_when: false
+  when: os_family == 'rhel'
+
+- name: Set reboot flag
+  ansible.builtin.set_fact:
+    system_reboot_required: >-
+      {{ (reboot_required_debian.stat.exists is defined and reboot_required_debian.stat.exists) or
+         (reboot_required_rhel.stdout is defined and reboot_required_rhel.stdout == '1') or
+         (patching_results.kernel_updated | default(false)) }}
+
+- name: Update patching results with reboot status
+  ansible.builtin.set_fact:
+    patching_results:
+      timestamp: "{{ patching_results.timestamp }}"
+      host: "{{ patching_results.host }}"
+      os_family: "{{ patching_results.os_family }}"
+      strategy: "{{ patching_results.strategy }}"
+      packages_updated: "{{ patching_results.packages_updated }}"
+      kernel_updated: "{{ patching_results.kernel_updated }}"
+      reboot_required: "{{ system_reboot_required }}"
+      reboot_performed: "{{ patching_results.reboot_performed }}"
+      duration: "{{ patching_results.duration }}"

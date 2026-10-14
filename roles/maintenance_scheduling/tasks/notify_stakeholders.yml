@@ -1,0 +1,13 @@
+---
+# Stakeholder notification tasks
+
+- name: Display notification message
+  ansible.builtin.debug:
+    msg: "Sending maintenance notification to {{ stakeholders }}"
+  when: notify_stakeholders
+
+- name: Log notification
+  ansible.builtin.shell: |
+    echo "[{{ ansible_date_time.iso8601 }}] Maintenance notification sent to {{ stakeholders | join(', ') }}" >> {{ maintenance_dir }}/notification.log
+  when: notify_stakeholders
+  ignore_errors: true

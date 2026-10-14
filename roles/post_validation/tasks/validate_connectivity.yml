@@ -1,0 +1,29 @@
+---
+# Connectivity validation tasks for post-validation
+
+- name: Check port connectivity
+  ansible.builtin.wait_for:
+    port: "{{ item }}"
+    timeout: 30
+  loop: "{{ post_validation_check_ports }}"
+  register: port_connectivity_result
+  ignore_errors: true
+
+- name: Count connectivity failures
+  ansible.builtin.set_fact:
+    connectivity_failures: "{{ port_connectivity_result.results | selectattr('failed', 'equalto', true) | list | length }}"
+
+- name: Set connectivity validation status
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_results.timestamp }}"
+      host: "{{ post_validation_results.host }}"
+      cpu_usage: "{{ post_validation_results.cpu_usage }}"
+      memory_usage: "{{ post_validation_results.memory_usage }}"
+      disk_usage: "{{ post_validation_results.disk_usage }}"
+      system_load: "{{ post_validation_results.system_load }}"
+      services_ok: "{{ post_validation_results.services_ok }}"
+      connectivity_ok: "{{ connectivity_failures == 0 }}"
+      applications_ok: "{{ post_validation_results.applications_ok }}"
+      logs_ok: "{{ post_validation_results.logs_ok }}"
+      overall_status: "{{ post_validation_results.overall_status }}"

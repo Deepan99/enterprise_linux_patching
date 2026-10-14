@@ -1,0 +1,21 @@
+---
+# Backup restoration tasks
+
+- name: Restore from backup if method is backup
+  ansible.builtin.shell: |
+    restore_backup.sh "{{ rollback_backup_path }}"
+  when: rollback_method == 'backup'
+  ignore_errors: true
+  register: backup_restore_result
+
+- name: Update rollback results with backup status
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_results.timestamp }}"
+      host: "{{ rollback_results.host }}"
+      method: "{{ rollback_results.method }}"
+      packages_rolled_back: "{{ rollback_results.packages_rolled_back }}"
+      kernel_rolled_back: "{{ rollback_results.kernel_rolled_back }}"
+      backup_restored: "{{ backup_restore_result.changed | default(false) }}"
+      reboot_performed: "{{ rollback_results.reboot_performed }}"
+      duration: "{{ rollback_results.duration }}"

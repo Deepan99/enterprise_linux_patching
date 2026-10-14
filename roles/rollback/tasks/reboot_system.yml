@@ -1,0 +1,23 @@
+---
+# System reboot tasks for rollback
+
+- name: Reboot system after rollback
+  ansible.builtin.reboot:
+    reboot_timeout: "{{ rollback_reboot_timeout }}"
+    connect_timeout: 10
+    pre_reboot_delay: 5
+    post_reboot_delay: 30
+    test_command: uptime
+  register: rollback_reboot_result
+
+- name: Update rollback results with reboot status
+  ansible.builtin.set_fact:
+    rollback_results:
+      timestamp: "{{ rollback_results.timestamp }}"
+      host: "{{ rollback_results.host }}"
+      method: "{{ rollback_results.method }}"
+      packages_rolled_back: "{{ rollback_results.packages_rolled_back }}"
+      kernel_rolled_back: "{{ rollback_results.kernel_rolled_back }}"
+      backup_restored: "{{ rollback_results.backup_restored }}"
+      reboot_performed: "{{ rollback_reboot_result.rebooted | default(false) }}"
+      duration: "{{ rollback_results.duration }}"

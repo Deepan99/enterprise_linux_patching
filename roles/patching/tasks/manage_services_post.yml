@@ -1,0 +1,16 @@
+---
+# Post-patch service management tasks
+
+- name: Start services after patching
+  ansible.builtin.service:
+    name: "{{ item }}"
+    state: started
+  loop: "{{ patching_services_to_stop }}"
+  register: services_started
+  ignore_errors: true
+
+- name: Display started services
+  ansible.builtin.debug:
+    msg: "Started service: {{ item.item }}"
+  loop: "{{ services_started.results }}"
+  when: item.changed

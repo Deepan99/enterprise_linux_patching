@@ -1,0 +1,31 @@
+---
+# Pre-validation role - Main entry point
+# This role performs comprehensive system validation before patching
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include resource validation tasks
+  ansible.builtin.include_tasks: validate_resources.yml
+
+- name: Include service validation tasks
+  ansible.builtin.include_tasks: validate_services.yml
+  when: pre_validation_check_services
+
+- name: Include filesystem validation tasks
+  ansible.builtin.include_tasks: validate_filesystem.yml
+  when: pre_validation_check_filesystem
+
+- name: Include maintenance window validation tasks
+  ansible.builtin.include_tasks: validate_maintenance_window.yml
+  when: pre_validation_check_maintenance_window
+
+- name: Include backup validation tasks
+  ansible.builtin.include_tasks: validate_backup.yml
+  when: pre_validation_require_backup
+
+- name: Include reporting tasks
+  ansible.builtin.include_tasks: report_results.yml
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml

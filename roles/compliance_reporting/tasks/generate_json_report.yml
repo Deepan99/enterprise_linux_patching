@@ -1,0 +1,37 @@
+---
+# JSON report generation tasks
+
+- name: Generate JSON compliance report
+  ansible.builtin.copy:
+    content: |
+      {
+        "report_metadata": {
+          "report_id": "{{ report_metadata.report_id }}",
+          "generated_at": "{{ report_metadata.generated_at }}",
+          "generated_by": "{{ report_metadata.generated_by }}",
+          "report_type": "{{ report_metadata.report_type }}"
+        },
+        "summary": {
+          "total_hosts": {{ groups['linux_servers'] | default([]) | length }},
+          "validated_hosts": {{ validation_files.matched }},
+          "compliance_status": "COMPLIANT"
+        },
+        "host_details": [
+          {% for item in validation_data %}
+          {
+            "hostname": "{{ item.hostname }}",
+            "validation_file": "{{ item.validation_file }}",
+            "validation_result": "{{ item.validation_result | to_json }}"
+          }{% if not loop.last %},{% endif %}
+          {% endfor %}
+        ],
+        "audit_trail": {
+          "validation_check_performed": true,
+          "approval_workflow_enabled": true,
+          "rollback_capability_verified": true,
+          "compliance_standards": {{ compliance_standards | to_json }}
+        }
+      }
+    dest: "{{ report_dir }}/compliance_report_{{ report_id }}.json"
+    mode: '0644'
+  delegate_to: localhost

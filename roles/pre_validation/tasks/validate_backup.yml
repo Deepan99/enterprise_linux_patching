@@ -1,0 +1,37 @@
+---
+# Backup validation tasks
+
+- name: Calculate backup age in minutes
+  ansible.builtin.set_fact:
+    backup_age_minutes: "{{ (pre_validation_backup_age_hours | int) * 60 }}"
+
+- name: Check last backup timestamp
+  ansible.builtin.shell: |
+    find /backup -type f -mmin -{{ backup_age_minutes }} 2>/dev/null | head -1
+  register: last_backup
+  changed_when: false
+  ignore_errors: true
+
+- name: Validate backup exists
+  ansible.builtin.assert:
+    that:
+      - last_backup.stdout != ""
+    fail_msg: "No backup found within last {{ pre_validation_backup_age_hours }} hours"
+    quiet: true
+  ignore_errors: true
+  register: backup_validation_failed
+
+- name: Set backup validation status
+  ansible.builtin.set_fact:
+    validation_results:
+      timestamp: "{{ validation_results.timestamp }}"
+      host: "{{ validation_results.host }}"
+      cpu_usage: "{{ validation_results.cpu_usage }}"
+      memory_usage: "{{ validation_results.memory_usage }}"
+      disk_usage: "{{ validation_results.disk_usage }}"
+      system_load: "{{ validation_results.system_load }}"
+      services_ok: "{{ validation_results.services_ok }}"
+      filesystem_ok: "{{ validation_results.filesystem_ok }}"
+      maintenance_window_ok: "{{ validation_results.maintenance_window_ok }}"
+      backup_ok: "{{ not backup_validation_failed.failed | default(true) }}"
+      overall_status: "{{ validation_results.overall_status }}"

@@ -1,0 +1,43 @@
+---
+# Post-validation role - Main entry point
+# This role performs comprehensive system validation after patching
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Wait for system to stabilize
+  ansible.builtin.include_tasks: wait_stabilize.yml
+
+- name: Include resource validation tasks
+  ansible.builtin.include_tasks: validate_resources.yml
+
+- name: Include service validation tasks
+  ansible.builtin.include_tasks: validate_services.yml
+  when: post_validation_verify_services
+
+- name: Include connectivity validation tasks
+  ansible.builtin.include_tasks: validate_connectivity.yml
+  when: post_validation_check_connectivity
+
+- name: Include application health validation tasks
+  ansible.builtin.include_tasks: validate_applications.yml
+  when: post_validation_check_applications
+
+- name: Include log validation tasks
+  ansible.builtin.include_tasks: validate_logs.yml
+  when: post_validation_check_logs
+
+- name: Include failure counting tasks
+  ansible.builtin.include_tasks: count_failures.yml
+
+- name: Include reporting tasks
+  ansible.builtin.include_tasks: report_results.yml
+
+- name: Include summary display tasks
+  ansible.builtin.include_tasks: display_summary.yml
+
+- name: Include rollback trigger tasks
+  ansible.builtin.include_tasks: trigger_rollback.yml
+  when:
+    - validation_failure_count > post_validation_rollback_threshold
+    - post_validation_auto_rollback_on_failure

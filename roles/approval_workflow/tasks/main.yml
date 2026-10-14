@@ -1,0 +1,18 @@
+---
+# Approval workflow role - Main entry point
+# This role handles the approval workflow for patching operations
+
+- name: Include initialization tasks
+  ansible.builtin.include_tasks: init.yml
+
+- name: Include request creation tasks
+  ansible.builtin.include_tasks: create_request.yml
+  when: approval_action | default('request') == 'request'
+
+- name: Include request approval tasks
+  ansible.builtin.include_tasks: approve_request.yml
+  when: approval_action | default('request') == 'approve'
+
+- name: Include request status check tasks
+  ansible.builtin.include_tasks: check_status.yml
+  when: approval_action | default('request') == 'check'

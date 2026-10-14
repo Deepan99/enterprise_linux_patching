@@ -1,0 +1,11 @@
+---
+# System stabilization wait tasks
+
+- name: Wait for system to stabilize
+  ansible.builtin.wait_for:
+    timeout: 60
+  delegate_to: localhost
+
+- name: Display stabilization message
+  ansible.builtin.debug:
+    msg: "System stabilization wait completed for {{ inventory_hostname }}"

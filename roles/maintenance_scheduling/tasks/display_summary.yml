@@ -1,0 +1,17 @@
+---
+# Display summary tasks for maintenance scheduling
+
+- name: Display maintenance schedule summary
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   MAINTENANCE WINDOW SCHEDULED"
+      - "================================================"
+      - "Maintenance ID: {{ maintenance_metadata.maintenance_id }}"
+      - "Target Group: {{ maintenance_metadata.target_group }}"
+      - "Type: {{ maintenance_metadata.type }}"
+      - "Start Time: {{ maintenance_metadata.start_time }}"
+      - "End Time: {{ maintenance_metadata.end_time }}"
+      - "Justification: {{ maintenance_metadata.justification }}"
+      - "Schedule File: {{ maintenance_dir }}/{{ maintenance_metadata.maintenance_id }}_schedule.txt"
+      - "================================================"

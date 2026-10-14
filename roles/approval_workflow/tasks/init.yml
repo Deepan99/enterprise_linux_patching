@@ -1,0 +1,20 @@
+---
+# Initialization tasks for approval workflow
+
+- name: Create requests directory
+  ansible.builtin.file:
+    path: "{{ requests_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Set request metadata
+  ansible.builtin.set_fact:
+    request_metadata:
+      request_id: "{{ request_id }}"
+      status: "{{ approval_status }}"
+      target_group: "{{ target_group }}"
+      strategy: "{{ patching_strategy }}"
+      schedule: "{{ patching_schedule }}"
+      justification: "{{ justification }}"
+      requested_by: "{{ lookup('env', 'USER') }}"
+      requested_at: "{{ ansible_date_time.iso8601 }}"

@@ -1,0 +1,34 @@
+---
+# Post-validation role default variables
+
+# Validation thresholds
+post_validation_cpu_threshold: 90
+post_validation_memory_threshold: 90
+post_validation_disk_threshold: 95
+
+# Service verification
+post_validation_verify_services: true
+post_validation_critical_services: []
+post_validation_service_state: running
+
+# Connectivity verification
+post_validation_check_connectivity: true
+post_validation_check_ports: [22, 80, 443]
+
+# Application health checks
+post_validation_check_applications: false
+post_validation_app_health_url: []
+post_validation_app_health_expected: 200
+
+# Log verification
+post_validation_check_logs: true
+post_validation_log_paths: []
+post_validation_error_keywords: ['error', 'critical', 'failed']
+
+# Performance baseline comparison
+post_validation_compare_baseline: false
+post_validation_baseline_file: /tmp/patching_baseline.json
+
+# Rollback trigger conditions
+post_validation_auto_rollback_on_failure: false
+post_validation_rollback_threshold: 3

@@ -1,0 +1,10 @@
+---
+# Generate Compliance Report
+# Simple orchestrator for compliance reporting
+
+- name: Generate Compliance Report
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  roles:
+    - role: compliance_reporting

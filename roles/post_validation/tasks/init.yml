@@ -1,0 +1,30 @@
+---
+# Initialization tasks for post-validation
+
+- name: Set post-validation timestamp
+  ansible.builtin.set_fact:
+    post_validation_timestamp: "{{ ansible_date_time.iso8601 }}"
+    post_validation_start_time: "{{ ansible_date_time.epoch }}"
+
+- name: Ensure validation results directory exists
+  ansible.builtin.file:
+    path: "{{ validation_results_dir | default('/tmp/patching_validation') }}"
+    state: directory
+    mode: '0755'
+  delegate_to: localhost
+  run_once: true
+
+- name: Initialize post-validation results dictionary
+  ansible.builtin.set_fact:
+    post_validation_results:
+      timestamp: "{{ post_validation_timestamp }}"
+      host: "{{ inventory_hostname }}"
+      cpu_usage: null
+      memory_usage: null
+      disk_usage: null
+      system_load: null
+      services_ok: true
+      connectivity_ok: true
+      applications_ok: true
+      logs_ok: true
+      overall_status: "PENDING"

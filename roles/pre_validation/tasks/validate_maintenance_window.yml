@@ -1,0 +1,38 @@
+---
+# Maintenance window validation tasks
+
+- name: Parse maintenance window start time
+  ansible.builtin.set_fact:
+    maintenance_start_hour: "{{ pre_validation_maintenance_window_start.split(':')[0] | int }}"
+    maintenance_end_hour: "{{ pre_validation_maintenance_window_end.split(':')[0] | int }}"
+
+- name: Check if system is in maintenance window
+  ansible.builtin.set_fact:
+    in_maintenance_window: >-
+      {{ (ansible_date_time.hour >= maintenance_start_hour and ansible_date_time.hour < maintenance_end_hour)
+         if maintenance_start_hour < maintenance_end_hour
+         else (ansible_date_time.hour >= maintenance_start_hour or ansible_date_time.hour < maintenance_end_hour) }}
+
+- name: Validate maintenance window
+  ansible.builtin.assert:
+    that:
+      - in_maintenance_window | bool
+    fail_msg: "System is not in maintenance window ({{ pre_validation_maintenance_window_start }} - {{ pre_validation_maintenance_window_end }})"
+    quiet: true
+  ignore_errors: true
+  register: maintenance_window_validation_failed
+
+- name: Set maintenance window validation status
+  ansible.builtin.set_fact:
+    validation_results:
+      timestamp: "{{ validation_results.timestamp }}"
+      host: "{{ validation_results.host }}"
+      cpu_usage: "{{ validation_results.cpu_usage }}"
+      memory_usage: "{{ validation_results.memory_usage }}"
+      disk_usage: "{{ validation_results.disk_usage }}"
+      system_load: "{{ validation_results.system_load }}"
+      services_ok: "{{ validation_results.services_ok }}"
+      filesystem_ok: "{{ validation_results.filesystem_ok }}"
+      maintenance_window_ok: "{{ not maintenance_window_validation_failed.failed | default(true) }}"
+      backup_ok: "{{ validation_results.backup_ok }}"
+      overall_status: "{{ validation_results.overall_status }}"

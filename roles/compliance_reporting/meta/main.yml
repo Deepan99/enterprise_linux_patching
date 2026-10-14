@@ -1,0 +1,28 @@
+---
+# Compliance reporting role metadata
+galaxy_info:
+  author: Enterprise Operations
+  description: Compliance reporting role for enterprise patching operations
+  company: Your Company
+  license: MIT
+  min_ansible_version: 2.9
+
+  platforms:
+    - name: EL
+      versions:
+        - all
+    - name: Ubuntu
+      versions:
+        - all
+    - name: Debian
+      versions:
+        - all
+
+  galaxy_tags:
+    - compliance
+    - reporting
+    - audit
+    - iso27001
+    - nist
+
+dependencies: []

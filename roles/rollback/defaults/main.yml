@@ -1,0 +1,28 @@
+---
+# Rollback role default variables
+
+# Rollback method
+rollback_method: package  # Options: package, snapshot, backup
+
+# Package rollback settings
+rollback_use_history: true
+rollback_history_limit: 5
+rollback_exclude_packages: []
+
+# Snapshot rollback settings
+rollback_snapshot_name: pre-patch-snapshot
+rollback_snapshot_retention: 7
+
+# Backup rollback settings
+rollback_backup_path: /backup
+rollback_restore_databases: false
+
+# Rollback behavior
+rollback_stop_services: true
+rollback_services_to_stop: []
+rollback_start_services: true
+
+# Verification after rollback
+rollback_verify: true
+rollback_reboot_after_rollback: true
+rollback_reboot_timeout: 600

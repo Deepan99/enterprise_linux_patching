@@ -1,0 +1,15 @@
+---
+# Alert generation tasks
+
+- name: Create maintenance window alert
+  ansible.builtin.copy:
+    content: |
+      # Maintenance Window Alert
+      # Scheduled: {{ maintenance_metadata.start_time }} - {{ maintenance_metadata.end_time }}
+      # Duration: {{ maintenance_metadata.type }}
+      # Target Group: {{ maintenance_metadata.target_group }}
+      # Please ensure all stakeholders are notified
+      # Created By: {{ maintenance_metadata.created_by }}
+      # Created At: {{ maintenance_metadata.created_at }}
+    dest: "{{ maintenance_dir }}/{{ maintenance_metadata.maintenance_id }}_alert.txt"
+    mode: '0644'

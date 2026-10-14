@@ -1,0 +1,18 @@
+---
+# Rollback trigger tasks for post-validation
+
+- name: Set rollback trigger flag
+  ansible.builtin.set_fact:
+    trigger_rollback: true
+
+- name: Display rollback trigger message
+  ansible.builtin.debug:
+    msg:
+      - "================================================"
+      - "   ROLLBACK TRIGGERED"
+      - "================================================"
+      - "Host: {{ post_validation_results.host }}"
+      - "Failure Count: {{ validation_failure_count }}"
+      - "Rollback Threshold: {{ post_validation_rollback_threshold }}"
+      - "Rollback will be executed in the rollback role"
+      - "================================================"

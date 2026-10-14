@@ -1,0 +1,14 @@
+---
+# Handlers for pre-validation role
+# These handlers can be triggered if validation fails
+
+- name: Alert on validation failure
+  ansible.builtin.debug:
+    msg: "Pre-validation failed for {{ inventory_hostname }}. Manual intervention may be required."
+  listen: validation_failed
+
+- name: Log validation failure
+  ansible.builtin.shell: |
+    echo "[{{ ansible_date_time.iso8601 }}] Pre-validation failed for {{ inventory_hostname }}" >> {{ validation_results_dir | default('/tmp/patching_validation') }}/validation_failures.log
+  delegate_to: localhost
+  listen: validation_failed
